@@ -1,0 +1,6 @@
+{
+  "name": "Ebny",
+  "description": "Children's platform boilerplate",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
