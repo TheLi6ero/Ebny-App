@@ -39,7 +39,7 @@ export const ProfileScreen = () => {
           <User size={40} />
         </div>
         <div>
-          <h2 style={{ color: 'white', fontSize: '24px', fontWeight: '900', marginBottom: '5px' }}>{user.name || 'بطل المنصة'}</h2>
+          <h2 style={{ color: 'white', fontSize: '24px', fontWeight: 'bold', marginBottom: '5px' }}>{user.name || 'بطل المنصة'}</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#fbbf24', fontWeight: 'bold' }}>
             <Star size={18} fill="currentColor" />
             <span>{user.total_points || 0} نجمة</span>
@@ -53,7 +53,7 @@ export const ProfileScreen = () => {
       <div style={{ backgroundColor: '#1e293b', width: '100%', maxWidth: '400px', borderRadius: '25px', padding: '20px', border: '2px solid #334155', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-          <span style={{ color: 'white', fontSize: '22px', fontWeight: '900' }}>مهاراتي</span>
+          <span style={{ color: 'white', fontSize: '22px', fontWeight: 'bold' }}>مهاراتي</span>
           <Brain size={28} color="#f43f5e" />
         </div>
         
@@ -94,7 +94,7 @@ export const ProfileScreen = () => {
             return (
               <g key={i}>
                 <text x={x} y={y - 5} fill="#94a3b8" fontSize="11" fontWeight="bold" textAnchor="middle">{item.label}</text>
-                <text x={x} y={y + 10} fill="#10b981" fontSize="13" fontWeight="900" textAnchor="middle">{item.value}%</text>
+                <text x={x} y={y + 10} fill="#10b981" fontSize="13" fontWeight="bold" textAnchor="middle">{item.value}%</text>
               </g>
             );
           })}

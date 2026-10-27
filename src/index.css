@@ -1,3 +1,34 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* تعريف الخط العادي */
+  @font-face {
+    font-family: 'Beiruti';
+    src: url('/fonts/Beiruti-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* تعريف الخط العريض */
+  @font-face {
+    font-family: 'Beiruti';
+    src: url('/fonts/Beiruti-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* تطبيق الخط على التطبيق كله */
+  body {
+    font-family: 'Beiruti', sans-serif !important;
+  }
+
+  /* تطبيق الخط العريض على العناوين والأزرار */
+  h1, h2, h3, h4, h5, h6, button {
+    font-family: 'Beiruti', sans-serif;
+    font-weight: 700;
+  }
+}

@@ -36,7 +36,7 @@ export const MapScreen = () => {
     <div style={{ minHeight: '100vh', paddingBottom: '250px', paddingTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#0f172a', overflowY: 'auto' }}>
       
       <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '8px' }}>رحلة التعلم 🚀</h1>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>رحلة التعلم 🚀</h1>
         <p style={{ color: '#94a3b8', fontWeight: 'bold' }}>أكمل الدروس لتفتح المستويات التالية</p>
       </div>
 
@@ -52,7 +52,7 @@ export const MapScreen = () => {
               
               <button
                 onClick={() => {
-                  if (node.status === 'current') setActiveLesson(node.id);
+                  if (node.status === 'current' || node.status === 'completed') setActiveLesson(node.id);
                 }}
                 style={{
                   width: '80px', height: '80px', borderRadius: '50%', border: '4px solid',

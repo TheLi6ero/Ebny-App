@@ -1,8 +1,9 @@
 import React from 'react';
-import { Lock, Play, GraduationCap } from 'lucide-react';
+import { Lock, Play, GraduationCap, ArrowRight } from 'lucide-react'; // ضفنا ArrowRight هنا
 
 interface LevelsScreenProps {
   onSelectLevel: (levelId: string) => void;
+  onBack: () => void; // ضفنا الخاصية دي عشان نقدر نرجع
 }
 
 const LEVELS = [
@@ -12,15 +13,25 @@ const LEVELS = [
   { id: 'primary2', title: 'الصف الثاني الابتدائي', subtitle: 'المرحلة الابتدائية', isLocked: true },
 ];
 
-export const LevelsScreen: React.FC<LevelsScreenProps> = ({ onSelectLevel }) => {
+export const LevelsScreen: React.FC<LevelsScreenProps> = ({ onSelectLevel, onBack }) => {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#0f172a', padding: '30px 20px', direction: 'rtl', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       
-      <div style={{ textAlign: 'center', marginBottom: '40px', marginTop: '20px' }}>
+      {/* شريط الرجوع */}
+      <div style={{ width: '100%', maxWidth: '400px', display: 'flex', justifyContent: 'flex-start', marginBottom: '10px' }}>
+        <button 
+          onClick={onBack} 
+          style={{ backgroundColor: '#1e293b', padding: '10px', borderRadius: '50%', color: 'white', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <ArrowRight size={24} />
+        </button>
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: '40px', marginTop: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px', color: '#10b981' }}>
           <GraduationCap size={50} />
         </div>
-        <h1 style={{ fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '8px' }}>اختر مستواك الدراسي</h1>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: 'white', marginBottom: '8px' }}>اختر مستواك الدراسي</h1>
         <p style={{ color: '#94a3b8', fontWeight: 'bold' }}>رحلتك التعليمية تبدأ من هنا</p>
       </div>
 
@@ -42,7 +53,7 @@ export const LevelsScreen: React.FC<LevelsScreenProps> = ({ onSelectLevel }) => 
             }}
           >
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', textAlign: 'right' }}>
-              <h3 style={{ fontSize: '20px', fontWeight: '900', color: level.isLocked ? '#94a3b8' : 'white', marginBottom: '4px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: level.isLocked ? '#94a3b8' : 'white', marginBottom: '4px' }}>
                 {level.title}
               </h3>
               <p style={{ fontSize: '14px', fontWeight: 'bold', color: level.isLocked ? '#64748b' : '#10b981' }}>

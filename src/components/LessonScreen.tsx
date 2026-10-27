@@ -3,12 +3,11 @@ import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
 import { CURRICULUM_DATA } from '../core/data/curriculum';
 import { SpokenText } from './SpokenText';
 import { RewardScreen } from './RewardScreen';
-import { useAppStore } from '../core/store/useAppStore'; // 1. استيراد الـ Store
+import { useAppStore } from '../core/store/useAppStore';
 
 export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: () => void }) => {
   const questions = CURRICULUM_DATA.arabic_kg1[lessonId as keyof typeof CURRICULUM_DATA.arabic_kg1] || [];
   
-  // 2. سحب بيانات المستخدم ودالة التحديث من الـ Store
   const { user, setUser } = useAppStore();
 
   const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -28,7 +27,6 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
   const question = questions[currentQIndex];
   const isCorrect = selectedAnswer === question.correct;
 
-  // دالة النطق
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -66,33 +64,41 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
       setSelectedAnswer(null);
       setIsAnswered(false);
     } else {
+      // 1. التحقق مما إذا كان الدرس مكتملاً من قبل
       const completed = JSON.parse(localStorage.getItem('completedLessons') || '[]');
-      if (!completed.includes(lessonId)) {
+      const isFirstTime = !completed.includes(lessonId);
+      
+      // 2. إذا كانت أول مرة، نضيفه لقائمة المكتملة
+      if (isFirstTime) {
         completed.push(lessonId);
         localStorage.setItem('completedLessons', JSON.stringify(completed));
       }
       
-      // 3. تحديث المهارات والنجوم في الـ Store
+      // 3. تحديث المهارات والنجوم بناءً على (أول مرة) أو (إعادة)
       if (user) {
         const currentSkills = user.skills || { knowledge: 0, speed: 0, logic: 0, creativity: 0, focus: 0, consistency: 0 };
         
-        // زيادة المهارات (أرقام تجريبية، ممكن تظبطها بعدين)
+        // لو أول مرة: 50 نجمة، لو إعادة: 5 نجوم
+        const pointsToAdd = isFirstTime ? 50 : 5; 
+        
+        // لو أول مرة: زيادة كاملة، لو إعادة: زيادة 1% بس
+        const boost = isFirstTime ? 1 : 0.2;
+
         const updatedUser = {
           ...user,
-          total_points: (user.total_points || 0) + 50, // إضافة 50 نجمة
+          total_points: (user.total_points || 0) + pointsToAdd,
           skills: {
-            knowledge: Math.min(100, currentSkills.knowledge + 5),
-            speed: Math.min(100, currentSkills.speed + 3),
-            logic: Math.min(100, currentSkills.logic + 4),
-            creativity: Math.min(100, currentSkills.creativity + 2),
-            focus: Math.min(100, currentSkills.focus + 3),
-            consistency: Math.min(100, currentSkills.consistency + 2),
+            knowledge: Math.min(100, currentSkills.knowledge + (5 * boost)),
+            speed: Math.min(100, currentSkills.speed + (3 * boost)),
+            logic: Math.min(100, currentSkills.logic + (4 * boost)),
+            creativity: Math.min(100, currentSkills.creativity + (2 * boost)),
+            focus: Math.min(100, currentSkills.focus + (3 * boost)),
+            consistency: Math.min(100, currentSkills.consistency + (2 * boost)),
           }
         };
-        setUser(updatedUser); // حفظ التحديث في المتجر
+        setUser(updatedUser);
       }
 
-      // تفعيل شاشة الاحتفال
       setShowReward(true);
     }
   };
@@ -109,7 +115,7 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
         <button onClick={onBack} style={{ backgroundColor: '#1e293b', padding: '10px', borderRadius: '50%', color: 'white', border: 'none', cursor: 'pointer' }}>
           <ArrowRight size={24} />
         </button>
-        <div style={{ color: '#10b981', fontWeight: '900', fontSize: '20px', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '5px 15px', borderRadius: '20px' }}>
+        <div style={{ color: '#10b981', fontWeight: 'bold', fontSize: '20px', backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '5px 15px', borderRadius: '20px' }}>
           {currentQIndex + 1} / {questions.length}
         </div>
       </div>
@@ -158,7 +164,7 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
                   <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{option.text}</span>
                 </>
               ) : (
-                <span style={{ fontSize: '40px', fontWeight: '900' }}>{option.text}</span>
+                <span style={{ fontSize: '40px', fontWeight: 'bold' }}>{option.text}</span>
               )}
 
               {isAnswered && option.text === question.correct && (
@@ -182,7 +188,7 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
           <button 
             onClick={handleNext}
             style={{
-              width: '100%', padding: '15px', borderRadius: '15px', fontWeight: '900', fontSize: '18px', color: 'white', border: 'none', cursor: 'pointer',
+              width: '100%', padding: '15px', borderRadius: '15px', fontWeight: 'bold', fontSize: '18px', color: 'white', border: 'none', cursor: 'pointer',
               backgroundColor: '#10b981'
             }}
           >

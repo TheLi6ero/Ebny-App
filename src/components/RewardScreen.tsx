@@ -78,7 +78,7 @@ export const RewardScreen: React.FC<RewardScreenProps> = ({ onFinish }) => {
       </div>
 
       {/* النصوص */}
-      <h1 style={{ color: 'white', fontSize: '36px', fontWeight: '900', marginBottom: '10px', textAlign: 'center', textShadow: '0 4px 20px rgba(16, 185, 129, 0.5)', zIndex: 10 }}>
+      <h1 style={{ color: 'white', fontSize: '36px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center', textShadow: '0 4px 20px rgba(16, 185, 129, 0.5)', zIndex: 10 }}>
         مبروك يا بطل! 🎉
       </h1>
       <p style={{ color: '#94a3b8', fontSize: '20px', fontWeight: 'bold', marginBottom: '40px', textAlign: 'center', zIndex: 10 }}>
@@ -98,7 +98,7 @@ export const RewardScreen: React.FC<RewardScreenProps> = ({ onFinish }) => {
         style={{
           display: 'flex', alignItems: 'center', gap: '10px', zIndex: 10,
           backgroundColor: '#10b981', color: 'white', padding: '18px 40px', 
-          borderRadius: '20px', fontSize: '22px', fontWeight: '900', 
+          borderRadius: '20px', fontSize: '22px', fontWeight: 'bold', 
           border: 'none', cursor: 'pointer', boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)',
           transition: 'transform 0.2s'
         }}

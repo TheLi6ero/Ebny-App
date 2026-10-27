@@ -54,7 +54,7 @@ export const SpokenText: React.FC<SpokenTextProps> = ({ text, onComplete }) => {
             textShadow: spokenWordIndex === index ? '0 0 15px rgba(16, 185, 129, 0.8)' : 'none',
             padding: '0 4px',
             fontSize: '28px',
-            fontWeight: '900'
+            fontWeight: 'bold'
           }}
         >
           {word}
