@@ -1,31 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
-import { CURRICULUM_DATA } from '../core/data/curriculum';
-import { SpokenText } from './SpokenText';
-import { RewardScreen } from './RewardScreen';
+import { SpokenText } from '../components/SpokenText';
+import { RewardScreen } from '../components/RewardScreen';
 import { useAppStore } from '../core/store/useAppStore';
+import { db } from '../lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: () => void }) => {
-  const questions = CURRICULUM_DATA.arabic_kg1[lessonId as keyof typeof CURRICULUM_DATA.arabic_kg1] || [];
-  
   const { user, setUser } = useAppStore();
-
+  
+  const [questions, setQuestions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [showReward, setShowReward] = useState(false);
 
-  if (questions.length === 0) {
-    return (
-      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-        <p>الأسئلة قيد التطوير...</p>
-        <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#334155', borderRadius: '10px', color: 'white' }}>عودة</button>
-      </div>
-    );
-  }
-
-  const question = questions[currentQIndex];
-  const isCorrect = selectedAnswer === question.correct;
+  // جلب الأسئلة من Firebase
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const questionsRef = collection(db, 'curriculums', 'eg_kg1_arabic', 'lessons', lessonId, 'questions');
+        const snapshot = await getDocs(questionsRef);
+        
+        const fetchedQuestions = snapshot.docs.map(doc => ({ 
+          id: doc.id, 
+          ...doc.data() 
+        }));
+        
+        setQuestions(fetchedQuestions);
+      } catch (err) {
+        console.error("Error fetching questions:", err);
+        setError("حدث خطأ أثناء تحميل الأسئلة.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuestions();
+  }, [lessonId]);
 
   const speak = (text: string) => {
     if ('speechSynthesis' in window) {
@@ -45,7 +59,9 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
     setIsAnswered(true);
     speak(optionText);
 
-    if (optionText === question.correct) {
+    const isCorrect = optionText === questions[currentQIndex].correct;
+
+    if (isCorrect) {
       setTimeout(() => speak('إجابة صحيحة'), 1000);
     } else {
       setTimeout(() => {
@@ -64,24 +80,19 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
       setSelectedAnswer(null);
       setIsAnswered(false);
     } else {
-      // 1. التحقق مما إذا كان الدرس مكتملاً من قبل
+      // عند إكمال الدرس
       const completed = JSON.parse(localStorage.getItem('completedLessons') || '[]');
       const isFirstTime = !completed.includes(lessonId);
       
-      // 2. إذا كانت أول مرة، نضيفه لقائمة المكتملة
       if (isFirstTime) {
         completed.push(lessonId);
         localStorage.setItem('completedLessons', JSON.stringify(completed));
       }
       
-      // 3. تحديث المهارات والنجوم بناءً على (أول مرة) أو (إعادة)
+      // تحديث المهارات والنجوم
       if (user) {
         const currentSkills = user.skills || { knowledge: 0, speed: 0, logic: 0, creativity: 0, focus: 0, consistency: 0 };
-        
-        // لو أول مرة: 50 نجمة، لو إعادة: 5 نجوم
         const pointsToAdd = isFirstTime ? 50 : 5; 
-        
-        // لو أول مرة: زيادة كاملة، لو إعادة: زيادة 1% بس
         const boost = isFirstTime ? 1 : 0.2;
 
         const updatedUser = {
@@ -98,14 +109,42 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
         };
         setUser(updatedUser);
       }
-
       setShowReward(true);
     }
   };
 
+  if (loading) {
+    return (
+      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '20px', fontWeight: 'bold' }}>
+        جاري تحميل الأسئلة... ⏳
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <p style={{ color: '#f43f5e', fontSize: '18px', fontWeight: 'bold' }}>{error}</p>
+        <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#334155', borderRadius: '10px', color: 'white', border: 'none', cursor: 'pointer' }}>عودة</button>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+        <p style={{ fontSize: '18px', fontWeight: 'bold' }}>لا توجد أسئلة لهذا الدرس حالياً.</p>
+        <button onClick={onBack} style={{ marginTop: '20px', padding: '10px 20px', backgroundColor: '#334155', borderRadius: '10px', color: 'white', border: 'none', cursor: 'pointer' }}>عودة</button>
+      </div>
+    );
+  }
+
   if (showReward) {
     return <RewardScreen onFinish={onBack} />;
   }
+
+  const question = questions[currentQIndex];
+  const isCorrect = selectedAnswer === question.correct;
 
   return (
     <div style={{ backgroundColor: '#0f172a', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px', direction: 'rtl' }}>
@@ -132,15 +171,19 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
 
       {/* الخيارات */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', width: '100%', maxWidth: '400px' }}>
-        {question.options.map((option) => {
+        {question.options?.map((option: any) => {
+          // لو الخيار جاي كـ String أو كـ Object (عشان يدعم الطريقتين)
+          const optionText = typeof option === 'string' ? option : option.text;
+          const optionImage = typeof option === 'object' ? option.imageUrl : null;
+
           let bgColor = '#1e293b';
           let borderColor = '#334155';
           let textColor = 'white';
 
           if (isAnswered) {
-            if (option.text === question.correct) {
+            if (optionText === question.correct) {
               bgColor = 'rgba(16, 185, 129, 0.2)'; borderColor = '#10b981'; textColor = '#10b981';
-            } else if (option.text === selectedAnswer) {
+            } else if (optionText === selectedAnswer) {
               bgColor = 'rgba(244, 63, 94, 0.2)'; borderColor = '#f43f5e'; textColor = '#f43f5e';
             } else {
               bgColor = '#1e293b'; textColor = '#64748b'; 
@@ -149,8 +192,8 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
 
           return (
             <button
-              key={option.text}
-              onClick={() => handleAnswer(option.text)}
+              key={optionText}
+              onClick={() => handleAnswer(optionText)}
               disabled={isAnswered && isCorrect}
               style={{
                 position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
@@ -158,19 +201,19 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
                 transition: 'all 0.2s', minHeight: '140px', cursor: (isAnswered && isCorrect) ? 'default' : 'pointer', color: textColor
               }}
             >
-              {option.imageUrl ? (
+              {optionImage ? (
                 <>
-                  <img src={option.imageUrl} alt={option.text} style={{ width: '60px', height: '60px', marginBottom: '10px', objectFit: 'contain' }} />
-                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{option.text}</span>
+                  <img src={optionImage} alt={optionText} style={{ width: '60px', height: '60px', marginBottom: '10px', objectFit: 'contain' }} />
+                  <span style={{ fontWeight: 'bold', fontSize: '16px' }}>{optionText}</span>
                 </>
               ) : (
-                <span style={{ fontSize: '40px', fontWeight: 'bold' }}>{option.text}</span>
+                <span style={{ fontSize: '30px', fontWeight: 'bold' }}>{optionText}</span>
               )}
 
-              {isAnswered && option.text === question.correct && (
+              {isAnswered && optionText === question.correct && (
                 <div style={{ position: 'absolute', top: '10px', right: '10px', color: '#10b981' }}><CheckCircle2 size={28} /></div>
               )}
-              {isAnswered && option.text === selectedAnswer && !isCorrect && (
+              {isAnswered && optionText === selectedAnswer && !isCorrect && (
                 <div style={{ position: 'absolute', top: '10px', right: '10px', color: '#f43f5e' }}><XCircle size={28} /></div>
               )}
             </button>
@@ -184,14 +227,7 @@ export const LessonScreen = ({ lessonId, onBack }: { lessonId: string, onBack: (
           <div style={{ color: '#10b981', fontWeight: 'bold', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CheckCircle2 size={24} /> ممتاز يا بطل!
           </div>
-          
-          <button 
-            onClick={handleNext}
-            style={{
-              width: '100%', padding: '15px', borderRadius: '15px', fontWeight: 'bold', fontSize: '18px', color: 'white', border: 'none', cursor: 'pointer',
-              backgroundColor: '#10b981'
-            }}
-          >
+          <button onClick={handleNext} style={{ width: '100%', padding: '15px', borderRadius: '15px', fontWeight: 'bold', fontSize: '18px', color: 'white', border: 'none', cursor: 'pointer', backgroundColor: '#10b981' }}>
             {currentQIndex === questions.length - 1 ? 'إنهاء الدرس 🎉' : 'السؤال التالي'}
           </button>
         </div>
