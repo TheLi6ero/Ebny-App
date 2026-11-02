@@ -5,16 +5,18 @@ import { CountriesScreen } from './screens/CountriesScreen';
 import { LevelsScreen } from './screens/LevelsScreen';
 import { MapScreen } from './screens/MapScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
-import { AdminScreen } from './screens/AdminScreen'; // ضيفنا الشاشة الجديدة
+import { AdminScreen } from './screens/AdminScreen';
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<'countries' | 'levels' | 'map' | 'profile' | 'admin'>('countries');
   const [activeCountry, setActiveCountry] = useState<string | null>(null);
+  
+  // 1. ضفنا دي عشان نحفظ المستوى المختار (KG1 أو KG2)
+  const [activeLevel, setActiveLevel] = useState<string>('kg1'); 
 
   return (
     <PlatformLayout themeColor="#10b981">
       
-      {/* زرار مؤقت للوصول للوحة الإدارة (هتخلعه بعدين أو تحطه في صفحة الإعدادات) */}
       {currentScreen !== 'admin' && (
         <button 
           onClick={() => setCurrentScreen('admin')}
@@ -32,18 +34,28 @@ function App() {
       )}
 
       {currentScreen === 'levels' && activeCountry === 'eg' && (
-        <LevelsScreen onSelectLevel={() => setCurrentScreen('map')} onBack={() => setCurrentScreen('countries')} />
+        <LevelsScreen 
+          // 2. بنحفظ المستوى اللي داس عليه
+          onSelectLevel={(levelId) => {
+            setActiveLevel(levelId); 
+            setCurrentScreen('map');
+          }} 
+          onBack={() => setCurrentScreen('countries')} 
+        />
       )}
 
       {currentScreen === 'map' && (
-        <MapScreen onBack={() => setCurrentScreen('levels')} />
+        // 3. بنبعت المستوى لشاشة الشجرة
+        <MapScreen 
+          grade={activeLevel} 
+          onBack={() => setCurrentScreen('levels')} 
+        />
       )}
 
       {currentScreen === 'profile' && (
         <ProfileScreen />
       )}
 
-      {/* شاشة الإدارة */}
       {currentScreen === 'admin' && (
         <AdminScreen onBack={() => setCurrentScreen('countries')} />
       )}
